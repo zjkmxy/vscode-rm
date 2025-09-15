@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+  <head>
+    <meta
+      name="viewport"
+      content="initial-scale=1, maximum-scale=1, user-scalable=no, minimum-scale=1, width=device-width, height=device-height"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>Tiles demo</title>
+    <style>
+      body {
+        background: white;
+        margin: 0;
+      }
+
+      .game-canvas {
+        position: absolute;
+        margin: 0;
+        padding: 0;
+        left: 0px;
+        top: 0px;
+        width: 100%;
+        height: 100%;
+        /*image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: -o-crisp-edges;
+            image-rendering: optimize-contrast;
+            -ms-interpolation-mode: nearest-neighbor;*/
+      }
+
+      .outer-container {
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        overflow: hidden;
+      }
+
+      .inner-container {
+        position: relative;
+        overflow: hidden;
+      }
+
+      #frontCanvas {
+        pointer-events: none;
+      }
+    </style>
+    <script>
+      window.ASSET_PATHS = "{{excalidraw-asset-path}}";
+      // window.ASSET_PATHS = '{"tilesets":"rpgmaker/data/Tilesets.json","map":"rpgmaker/data/Map003.json","tilesetNames":["rpgmaker/img/Outside_A1.png","rpgmaker/img/Outside_A2.png","rpgmaker/img/Outside_A3.png","rpgmaker/img/Outside_A4.png","rpgmaker/img/Outside_A5.png","rpgmaker/img/Outside_B.png","rpgmaker/img/Outside_C.png","",""]}';
+    </script>
+    <script type="module" src="/src/main.ts" type="text/javascript"></script>
+  </head>
+  <body onload="go()">
+    <canvas id="backCanvas" class="game-canvas"></canvas>
+  </body>
+</html>
