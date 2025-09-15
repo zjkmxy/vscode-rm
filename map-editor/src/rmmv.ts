@@ -909,7 +909,7 @@ class LevelLoader {
         tileResources[tileName] = await PIXI.Assets.load(tileName);
       }
     }
-    const result = new ShaderTilemap(800, 600, paintAll);
+    const result = new ShaderTilemap(map.width * 48, map.height * 48, paintAll);
 
     for (const tileName of assetPaths.tilesetNames) {
       const tex = tileResources[tileName];

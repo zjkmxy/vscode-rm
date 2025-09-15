@@ -21,26 +21,33 @@ function resizeTilemap() {
   stage.filterArea = new PIXI.Rectangle(0, 0, _app.renderer.width * scale, _app.renderer.height * scale);
 }
 
-function resize(width: number, height: number) {
+// function resize(width: number, height: number) {
+//   const backCanvas = document.querySelector('#backCanvas') as HTMLCanvasElement;
+//   backCanvas.style.width = `${width}px`;
+//   backCanvas.style.height = `${height}px`;
+//   _app.renderer.resize(width, height);
+//   resizeTilemap();
+// }
+
+async function setupView() {
+  const assetData = JSON.parse((window as any).ASSET_PATHS) as AssetPaths;
+  const mapData = (await PIXI.Assets.load(assetData.map)) as MapData;
+  const [width, height] = [mapData.width * 48, mapData.height * 48];
+
   const backCanvas = document.querySelector('#backCanvas') as HTMLCanvasElement;
   backCanvas.style.width = `${width}px`;
   backCanvas.style.height = `${height}px`;
-  _app.renderer.resize(width, height);
-  resizeTilemap();
-}
-
-async function setupView() {
-  const backCanvas = document.querySelector('#backCanvas') as HTMLCanvasElement;
 
   await _app.init({
-    width: backCanvas.width,
-    height: backCanvas.height,
+    // width: backCanvas.width,
+    // height: backCanvas.height,
+    width,
+    height,
     canvas: backCanvas,
     resolution,
-    antialias: true
+    antialias: true,
+    preference: 'webgl'
   });
-
-  resize(window.innerWidth, window.innerHeight);
 }
 
 async function setupGame() {
@@ -55,8 +62,8 @@ async function setupGame() {
   stage.addChild(tilemap);
   _app.stage = stage;
 
-  // resizeTilemap();
-  resize(mapData.width * 48, mapData.height * 48);
+  resizeTilemap();
+  // resize(mapData.width * 48, mapData.height * 48);
 
   _app.ticker.add(update);
 }
