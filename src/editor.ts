@@ -49,20 +49,25 @@ export class RMMapEditorProvider implements vscode.CustomTextEditorProvider {
       }
     });
 
+    // Create cursor status bar
+    const cursorStatusBarItem = vscode.window.createStatusBarItem(
+      'rpgmaker.mapEditor.cursorStatusBar',
+      vscode.StatusBarAlignment.Right,
+      100
+    );
+    this.context.subscriptions.push(cursorStatusBarItem);
+
     // Make sure we get rid of the listener when our editor is closed.
     webviewPanel.onDidDispose(() => {
       changeDocumentSubscription.dispose();
+      cursorStatusBarItem.dispose();
     });
 
     // Receive message from the webview.
     webviewPanel.webview.onDidReceiveMessage((e) => {
       switch (e.type) {
-        case 'add':
-          // this.addNewScratch(document);
-          return;
-
-        case 'delete':
-          // this.deleteScratch(document, e.id);
+        case 'setCursorPos':
+          this.setCursorPos(cursorStatusBarItem, e.x, e.y);
           return;
       }
     });
@@ -89,8 +94,8 @@ export class RMMapEditorProvider implements vscode.CustomTextEditorProvider {
     );
     const mapJson = JSON.parse(document.getText());
     const tileset = tilesetsJson[mapJson.tilesetId];
-    const tilesetUris = tileset.tilesetNames.map(
-      (value: string) => value ? `${webview.asWebviewUri(vscode.Uri.joinPath(imgFolderUri, `${value}.png`))}` : ""
+    const tilesetUris = tileset.tilesetNames.map((value: string) =>
+      value ? `${webview.asWebviewUri(vscode.Uri.joinPath(imgFolderUri, `${value}.png`))}` : ''
     );
 
     const tilesetsUri = webview.asWebviewUri(vscode.Uri.joinPath(dataFolderUri, 'Tilesets.json'));
@@ -125,6 +130,11 @@ export class RMMapEditorProvider implements vscode.CustomTextEditorProvider {
         return newUrl;
       }
     );
+  }
+
+  private setCursorPos(cursorStatusBarItem: vscode.StatusBarItem, x: number, y: number) {
+    cursorStatusBarItem.text = `x:${x}, y:${y}`;
+    cursorStatusBarItem.show();
   }
 
   /**

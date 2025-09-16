@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@types/vscode-webview": "^1.57.5",
     "typescript": "~5.8.3",
     "vite": "^7.1.2"
   },

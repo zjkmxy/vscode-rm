@@ -1,6 +1,7 @@
 import * as PIXI from 'pixi.js';
 import { requireRpgMaker, ShaderTilemap, type AssetPaths, type MapData } from './rmmv';
 
+const vscode = (globalThis as any).acquireVsCodeApi ? acquireVsCodeApi() : null;
 const _app = new PIXI.Application();
 const rpgMakerLoader = requireRpgMaker();
 let stage: PIXI.Container;
@@ -29,8 +30,10 @@ function resizeTilemap() {
 //   resizeTilemap();
 // }
 
+let assetPaths: string = '';
+
 async function setupView() {
-  const assetData = JSON.parse((window as any).ASSET_PATHS) as AssetPaths;
+  const assetData = JSON.parse(assetPaths) as AssetPaths;
   const mapData = (await PIXI.Assets.load(assetData.map)) as MapData;
   const [width, height] = [mapData.width * 48, mapData.height * 48];
 
@@ -46,12 +49,14 @@ async function setupView() {
     canvas: backCanvas,
     resolution,
     antialias: true,
-    preference: 'webgl'  // webgpu has size issue
+    preference: 'webgl' // webgpu has size issue
   });
 }
 
+let mapPoint = new PIXI.Point();
+
 async function setupGame() {
-  const assetData = JSON.parse((window as any).ASSET_PATHS) as AssetPaths;
+  const assetData = JSON.parse(assetPaths) as AssetPaths;
   const mapData = (await PIXI.Assets.load(assetData.map)) as MapData;
   const map = await rpgMakerLoader.load(mapData, assetData, true);
 
@@ -65,7 +70,33 @@ async function setupGame() {
   resizeTilemap();
   // resize(mapData.width * 48, mapData.height * 48);
 
+  // Create the select rect for TEMP use
+  const selectRect = _app.stage.addChild(
+    new PIXI.Graphics()
+      .rect(0, 0, 48, 48)
+      .fill({ color: 0xffffff, alpha: 0.4 })
+      .stroke({ color: 0x111111, alpha: 0.9, width: 1 })
+  );
+
   _app.ticker.add(update);
+
+  // Follow the pointer
+  _app.stage.eventMode = 'static';
+  _app.stage.hitArea = _app.screen;
+  _app.stage.addEventListener('pointermove', (e) => {
+    const newPos = new PIXI.Point(Math.floor(e.globalX / 48.0), Math.floor(e.globalY / 48.0));
+    if (!newPos.equals(mapPoint)) {
+      mapPoint.copyFrom(newPos);
+      // Move the cursor
+      selectRect.position.set(mapPoint.x * 48.0, mapPoint.y * 48.0);
+      // Post message
+      vscode?.postMessage({
+        type: 'setCursorPos',
+        x: mapPoint.x,
+        y: mapPoint.y,
+      })
+    }
+  });
 }
 
 let initRefreshed = false;
@@ -86,6 +117,22 @@ function update(ticker: PIXI.Ticker) {
 }
 
 (globalThis as any).go = async () => {
+  assetPaths = (window as any).ASSET_PATHS;
+  // Patch for dev
+  if (assetPaths === '{{excalidraw-asset-path}}') {
+    assetPaths = `{"tilesets":"rpgmaker/data/Tilesets.json",
+        "map":"rpgmaker/data/Map003.json",
+        "tilesetNames":[
+          "rpgmaker/img/tilesets/Outside_A1.png",
+          "rpgmaker/img/tilesets/Outside_A2.png",
+          "rpgmaker/img/tilesets/Outside_A3.png",
+          "rpgmaker/img/tilesets/Outside_A4.png",
+          "rpgmaker/img/tilesets/Outside_A5.png",
+          "rpgmaker/img/tilesets/Outside_B.png",
+          "rpgmaker/img/tilesets/Outside_C.png",
+          "",
+          ""]}`;
+  }
   await setupView();
   await setupGame();
   (globalThis as any).pixiapp = _app;
