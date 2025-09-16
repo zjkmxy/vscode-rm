@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { CompositeTilemap } from '@pixi/tilemap';
+import { CompositeTilemap } from './pixi-tilemap';
 
 /**
  * Returns a modulo value which is always positive.
@@ -531,12 +531,11 @@ export class ShaderTilemap extends Tilemap {
     // const bitmaps = this.bitmaps;
     // this.lowerLayer.tileset(bitmaps);
     // this.upperLayer.tileset(bitmaps);
-    const bitmaps = this.bitmaps.flatMap((value) => (value ? value.source : []));
     for (const layer of this.lowerLayer) {
-      layer.tileset(bitmaps);
+      layer.tileset(this.bitmaps);
     }
     for (const layer of this.upperLayer) {
-      layer.tileset(bitmaps);
+      layer.tileset(this.bitmaps);
     }
   }
 
@@ -571,10 +570,12 @@ export class ShaderTilemap extends Tilemap {
 
   protected override updateTileAnim(x: number, y: number) {
     for (const layer of this.lowerLayer) {
-      layer.tileAnim = [x, y];
+      // layer.tileAnim = [x, y];
+      layer.setTileAnim({x, y});
     }
     for (const layer of this.upperLayer) {
-      layer.tileAnim = [x, y];
+      // layer.tileAnim = [x, y];
+      layer.setTileAnim({x, y});
     }
   }
 

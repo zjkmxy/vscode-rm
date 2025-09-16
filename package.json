@@ -2,7 +2,7 @@
 	"name": "rpgmaker-tools",
 	"displayName": "rpgmaker-tools",
 	"description": "RPG Maker MV/MZ Tools",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "zjkmxy",
 	"repository": "https://github.com/zjkmxy/vscode-rm",
 	"engines": {

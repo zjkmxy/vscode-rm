@@ -46,7 +46,7 @@ async function setupView() {
     canvas: backCanvas,
     resolution,
     antialias: true,
-    preference: 'webgl'
+    preference: 'webgl'  // webgpu has size issue
   });
 }
 
