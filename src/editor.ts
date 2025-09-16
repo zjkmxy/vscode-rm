@@ -82,7 +82,7 @@ export class RMMapEditorProvider implements vscode.CustomTextEditorProvider {
     const textDecoder = new TextDecoder();
 
     const dataFolderUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, 'data');
-    const imgFolderUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, 'img');
+    const imgFolderUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, 'img', 'tilesets');
 
     const tilesetsJson = JSON.parse(
       textDecoder.decode(await vscode.workspace.fs.readFile(vscode.Uri.joinPath(dataFolderUri, 'Tilesets.json')))
