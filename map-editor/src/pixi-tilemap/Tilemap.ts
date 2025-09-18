@@ -1,12 +1,4 @@
-import {
-  Bounds,
-  ViewContainer,
-  type Instruction,
-  MeshGeometry,
-  type PointData,
-  Texture,
-  type View
-} from 'pixi.js';
+import { Bounds, ViewContainer, type Instruction, MeshGeometry, type PointData, Texture, type View } from 'pixi.js';
 
 export type PointStruct = {
   u: number;

@@ -14,6 +14,25 @@
 	"activationEvents": [],
 	"main": "./out/extension.js",
 	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "rpgmaker-panel",
+					"title": "RPG Maker",
+					"icon": "assets/view-container.png"
+				}
+			]
+		},
+		"views": {
+			"rpgmaker-panel": [
+				{
+					"id": "rpgmaker.mapTile",
+					"name": "Map Tiles",
+					"type": "webview",
+					"icon": "assets/webview.png"
+				}
+			]
+		},
 		"customEditors": [
 			{
 				"viewType": "rpgmaker.mapEditor",
@@ -28,7 +47,8 @@
 		"commands": []
 	},
 	"scripts": {
-		"vscode:prepublish": "npm run compile",
+		"install": "",
+		"vscode:prepublish": "yarn compile",
 		"compile": "tsc -p ./",
 		"lint": "eslint",
 		"watch": "tsc -watch -p ./"
@@ -39,6 +59,8 @@
 		"@types/node": "^22",
 		"@types/vscode": "^1.100.0",
 		"eslint": "^9.13.0",
+		"eslint-config-prettier": "^10.1.8",
+		"eslint-plugin-prettier": "^5.5.4",
 		"prettier": "^3.6.2",
 		"typescript": "^5.8.2",
 		"typescript-eslint": "^8.26.0"

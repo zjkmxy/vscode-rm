@@ -53,7 +53,7 @@ async function setupView() {
   });
 }
 
-let mapPoint = new PIXI.Point();
+const mapPoint = new PIXI.Point();
 
 async function setupGame() {
   const assetData = JSON.parse(assetPaths) as AssetPaths;
@@ -93,8 +93,8 @@ async function setupGame() {
       vscode?.postMessage({
         type: 'setCursorPos',
         x: mapPoint.x,
-        y: mapPoint.y,
-      })
+        y: mapPoint.y
+      });
     }
   });
 }

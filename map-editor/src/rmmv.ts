@@ -571,11 +571,11 @@ export class ShaderTilemap extends Tilemap {
   protected override updateTileAnim(x: number, y: number) {
     for (const layer of this.lowerLayer) {
       // layer.tileAnim = [x, y];
-      layer.setTileAnim({x, y});
+      layer.setTileAnim({ x, y });
     }
     for (const layer of this.upperLayer) {
       // layer.tileAnim = [x, y];
-      layer.setTileAnim({x, y});
+      layer.setTileAnim({ x, y });
     }
   }
 

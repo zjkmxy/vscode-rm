@@ -14,8 +14,6 @@ export class RMMapEditorProvider implements vscode.CustomTextEditorProvider {
 
   /**
    * Called when our custom editor is opened.
-   *
-   *
    */
   public async resolveCustomTextEditor(
     document: vscode.TextDocument,

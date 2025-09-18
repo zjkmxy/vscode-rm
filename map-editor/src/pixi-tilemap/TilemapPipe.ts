@@ -55,7 +55,6 @@ export class TilemapPipe implements RenderPipe<Tilemap> {
     (this._renderer as unknown as null) = null;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   public addRenderable(renderable: Tilemap, instructionSet: InstructionSet) {
     const batcher = this._renderer.renderPipes.batch;
 

@@ -1,6 +1,7 @@
 dist/*
+out/*
 node_modules/*
 *.json
 *.code-snippets
-webview/dist/*
-webview/node_modules/*
+map-editor/dist/*
+map-editor/node_modules/*
