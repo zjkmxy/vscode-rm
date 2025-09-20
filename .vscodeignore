@@ -4,7 +4,7 @@
 **/rpgmaker
 !map-editor/dist/**
 !map-tile/dist/**
-!out/**
+!dist/**
 !assets/**
 !README.md
 !package.json

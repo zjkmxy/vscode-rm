@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { getNonce } from './util';
 import { Blackboard } from './blackboard';
+import * as path from 'path';
 
 export class RMMapEditorProvider implements vscode.CustomTextEditorProvider {
   public static register(context: vscode.ExtensionContext, blackboard: Blackboard): vscode.Disposable {
@@ -76,13 +77,13 @@ export class RMMapEditorProvider implements vscode.CustomTextEditorProvider {
 
     // On creation
     if (webviewPanel.active) {
-      this.blackboard.activeMapName = document.fileName.split('/').slice(-1)[0];
+      this.blackboard.activeMapName = path.basename(document.fileName);
     }
 
     // On focus change
     webviewPanel.onDidChangeViewState((e) => {
       if (e.webviewPanel.active) {
-        this.blackboard.activeMapName = document.fileName.split('/').slice(-1)[0];
+        this.blackboard.activeMapName = path.basename(document.fileName);
       }
     });
 

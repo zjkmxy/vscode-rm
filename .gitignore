@@ -31,3 +31,4 @@ public
 demo
 dist
 .vscode-test-web
+.yarn/install-state.gz
