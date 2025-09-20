@@ -898,7 +898,7 @@ export type AssetPaths = {
   tilesetNames: string[];
 };
 
-class LevelLoader {
+export class LevelLoader {
   async load(map: MapData, assetPaths: AssetPaths, paintAll = false) {
     PIXI.Assets.add({ alias: 'tilesets', src: assetPaths.tilesets });
     const tilesets = await PIXI.Assets.load('tilesets');

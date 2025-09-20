@@ -15,7 +15,8 @@ export default [
       'node_modules/**',
       'vite.config.ts',
       'map-editor/dist/**',
-      'map-editor/node_modules/**'
+      'map-tile/dist/**',
+      'rm-common/dist/**'
     ]
   },
   {

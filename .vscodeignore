@@ -3,6 +3,7 @@
 **/node_modules
 **/rpgmaker
 !map-editor/dist/**
+!map-tile/dist/**
 !out/**
 !assets/**
 !README.md

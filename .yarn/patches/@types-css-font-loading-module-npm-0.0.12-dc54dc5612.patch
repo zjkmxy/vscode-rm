@@ -1,0 +1,26 @@
+diff --git a/index.d.ts b/index.d.ts
+index 14d327b8c0541d642647cdfe58fed7dd0d0395f7..e9cd295ff86cb63e1e222c5108fd83c7b94bf22d 100644
+--- a/index.d.ts
++++ b/index.d.ts
+@@ -41,9 +41,9 @@ declare global {
+ 
+     interface FontFaceSet extends Set<FontFace>, EventTarget {
+         // events for when loading state changes
+-        onloading: ((this: FontFaceSet, event: Event) => any) | null;
+-        onloadingdone: ((this: FontFaceSet, event: Event) => any) | null;
+-        onloadingerror: ((this: FontFaceSet, event: Event) => any) | null;
++        onloading: ((this: FontFaceSet, event: FontFaceSetLoadEvent) => any) | null;
++        onloadingdone: ((this: FontFaceSet, event: FontFaceSetLoadEvent) => any) | null;
++        onloadingerror: ((this: FontFaceSet, event: FontFaceSetLoadEvent) => any) | null;
+ 
+         // EventTarget
+         addEventListener<K extends keyof FontFaceSetCallbackMap>(
+@@ -85,7 +85,7 @@ declare global {
+ 
+     var FontFace: {
+         prototype: FontFace;
+-        new(family: string, source: string | BinaryData, descriptors?: FontFaceDescriptors): FontFace;
++        new(family: string, source: string | BufferSource, descriptors?: FontFaceDescriptors): FontFace;
+     };
+ 
+     interface FontFaceSetLoadEvent extends Event {

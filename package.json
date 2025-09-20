@@ -2,7 +2,7 @@
 	"name": "rpgmaker-tools",
 	"displayName": "rpgmaker-tools",
 	"description": "RPG Maker MV/MZ Tools",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"publisher": "zjkmxy",
 	"repository": "https://github.com/zjkmxy/vscode-rm",
 	"engines": {
@@ -51,7 +51,8 @@
 		"vscode:prepublish": "yarn compile",
 		"compile": "tsc -p ./",
 		"lint": "eslint",
-		"watch": "tsc -watch -p ./"
+		"watch": "tsc -watch -p ./",
+		"package": "vsce package"
 	},
 	"devDependencies": {
 		"@eslint/js": "^9.13.0",
@@ -64,5 +65,17 @@
 		"prettier": "^3.6.2",
 		"typescript": "^5.8.2",
 		"typescript-eslint": "^8.26.0"
+	},
+	"workspaces": [
+		"map-editor",
+		"map-tile",
+		"rm-common"
+	],
+	"packageManager": "yarn@4.10.2",
+	"resolutions": {
+		"@types/css-font-loading-module@npm:^0.0.12": "patch:@types/css-font-loading-module@npm%3A0.0.12#~/.yarn/patches/@types-css-font-loading-module-npm-0.0.12-dc54dc5612.patch"
+	},
+	"dependencies": {
+		"eventemitter3": "^5.0.1"
 	}
 }

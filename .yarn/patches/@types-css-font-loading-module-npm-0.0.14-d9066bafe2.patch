@@ -1,0 +1,13 @@
+diff --git a/index.d.ts b/index.d.ts
+index 728dd9c751efce808e229c6a160cd585898a64ca..e9cd295ff86cb63e1e222c5108fd83c7b94bf22d 100644
+--- a/index.d.ts
++++ b/index.d.ts
+@@ -85,7 +85,7 @@ declare global {
+ 
+     var FontFace: {
+         prototype: FontFace;
+-        new(family: string, source: string | BinaryData, descriptors?: FontFaceDescriptors): FontFace;
++        new(family: string, source: string | BufferSource, descriptors?: FontFaceDescriptors): FontFace;
+     };
+ 
+     interface FontFaceSetLoadEvent extends Event {

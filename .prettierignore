@@ -4,4 +4,3 @@ node_modules/*
 *.json
 *.code-snippets
 map-editor/dist/*
-map-editor/node_modules/*

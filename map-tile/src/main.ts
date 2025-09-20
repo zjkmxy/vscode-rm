@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { requireRpgMaker, ShaderTilemap, type AssetPaths, type MapData } from 'rm-common';
+import { ShaderTilemap, requireRpgMaker, type AssetPaths, type MapData, Tilemap } from 'rm-common';
 
 const vscode = (globalThis as any).acquireVsCodeApi ? acquireVsCodeApi() : null;
 const _app = new PIXI.Application();
@@ -32,10 +32,29 @@ function resizeTilemap() {
 
 let assetPaths: string = '';
 
+const paletteWidth = 8;
+const paletteHeight = 32 * 5;
+const defaultMapData: Array<number> = [];
+
+function setupMapData() {
+  // A1-A4 (128)
+  for (let i = Tilemap.TILE_ID_A2; i < Tilemap.TILE_ID_MAX; i += 48) {
+    defaultMapData.push(i);
+  }
+  // A5 (128)
+  for (let i = 0; i < 128; i++) {
+    defaultMapData.push(Tilemap.TILE_ID_A5 + i);
+  }
+  // BCDE (1024)
+  for (let i = 0; i < 1024; i++) {
+    defaultMapData.push(i);
+  }
+  // 1~5 layers are empty
+  defaultMapData.concat(Array.from({ length: paletteWidth * paletteHeight * 5 }, () => 0));
+}
+
 async function setupView() {
-  const assetData = JSON.parse(assetPaths) as AssetPaths;
-  const mapData = (await PIXI.Assets.load(assetData.map)) as MapData;
-  const [width, height] = [mapData.width * 48, mapData.height * 48];
+  const [width, height] = [paletteWidth * 48, paletteHeight * 48];
 
   const backCanvas = document.querySelector('#backCanvas') as HTMLCanvasElement;
   backCanvas.style.width = `${width}px`;
@@ -58,6 +77,9 @@ const mapPoint = new PIXI.Point();
 async function setupGame() {
   const assetData = JSON.parse(assetPaths) as AssetPaths;
   const mapData = (await PIXI.Assets.load(assetData.map)) as MapData;
+  mapData.width = paletteWidth;
+  mapData.height = paletteHeight;
+  mapData.data = defaultMapData;
   const map = await rpgMakerLoader.load(mapData, assetData, true);
 
   tilemap = map;
@@ -83,7 +105,7 @@ async function setupGame() {
   // Follow the pointer
   _app.stage.eventMode = 'static';
   _app.stage.hitArea = _app.screen;
-  _app.stage.addEventListener('pointermove', (e) => {
+  _app.stage.addEventListener('pointertap', (e) => {
     const newPos = new PIXI.Point(Math.floor(e.globalX / 48.0), Math.floor(e.globalY / 48.0));
     if (!newPos.equals(mapPoint)) {
       mapPoint.copyFrom(newPos);
@@ -130,10 +152,11 @@ function update(ticker: PIXI.Ticker) {
           "rpgmaker/img/tilesets/Outside_A5.png",
           "rpgmaker/img/tilesets/Outside_B.png",
           "rpgmaker/img/tilesets/Outside_C.png",
-          "",
-          ""]}`;
+          "rpgmaker/img/tilesets/Inside_B.png",
+          "rpgmaker/img/tilesets/Inside_C.png"]}`;
   }
   await setupView();
+  setupMapData();
   await setupGame();
   (globalThis as any).pixiapp = _app;
 };

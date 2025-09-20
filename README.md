@@ -23,13 +23,16 @@ code --install-extension ./rpgmaker-tools-*.vsix
 ## Development
 
 Debug build:
-- Go to `map-editor` and `yarn build`.
-- Go to `map-tile` and `yarn build`.
-- Use the VSCode launch command to start a debug instance.
+```bash
+yarn workspace map-editor build
+yarn workspace map-tile build
+```
+
+Use the VSCode launch command to start a debug instance.
 
 Pack:
 ```bash
-cd map-editor && yarn build && cd ..
-cd map-tile && yarn build && cd ..
+yarn workspace map-editor build
+yarn workspace map-tile build
 vsce package
 ```

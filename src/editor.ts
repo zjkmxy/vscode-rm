@@ -1,16 +1,20 @@
 import * as vscode from 'vscode';
 import { getNonce } from './util';
+import { Blackboard } from './blackboard';
 
 export class RMMapEditorProvider implements vscode.CustomTextEditorProvider {
-  public static register(context: vscode.ExtensionContext): vscode.Disposable {
-    const provider = new RMMapEditorProvider(context);
+  public static register(context: vscode.ExtensionContext, blackboard: Blackboard): vscode.Disposable {
+    const provider = new RMMapEditorProvider(context, blackboard);
     const providerRegistration = vscode.window.registerCustomEditorProvider(RMMapEditorProvider.viewType, provider);
     return providerRegistration;
   }
 
   private static readonly viewType = 'rpgmaker.mapEditor';
 
-  constructor(private readonly context: vscode.ExtensionContext) {}
+  constructor(
+    private readonly context: vscode.ExtensionContext,
+    private readonly blackboard: Blackboard
+  ) {}
 
   /**
    * Called when our custom editor is opened.
@@ -70,6 +74,18 @@ export class RMMapEditorProvider implements vscode.CustomTextEditorProvider {
       }
     });
 
+    // On creation
+    if (webviewPanel.active) {
+      this.blackboard.activeMapName = document.fileName.split('/').slice(-1)[0];
+    }
+
+    // On focus change
+    webviewPanel.onDidChangeViewState((e) => {
+      if (e.webviewPanel.active) {
+        this.blackboard.activeMapName = document.fileName.split('/').slice(-1)[0];
+      }
+    });
+
     updateWebview();
   }
 
@@ -107,7 +123,7 @@ export class RMMapEditorProvider implements vscode.CustomTextEditorProvider {
 
     const content = await vscode.workspace.fs.readFile(vscode.Uri.joinPath(webviewUri, 'index.html'));
     let html = textDecoder.decode(content);
-    html = html.replace('"{{excalidraw-asset-path}}"', `'${JSON.stringify(config)}'`);
+    html = html.replace('"{{rpgmaker-asset-path}}"', `'${JSON.stringify(config)}'`);
 
     // Use a nonce to whitelist which scripts can be run
     const nonce = getNonce();

@@ -1,20 +1,24 @@
 import * as vscode from 'vscode';
 import { getNonce } from './util';
+import { Blackboard } from './blackboard';
 
 export class ColorsViewProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'rpgmaker.mapTile';
 
   private _view?: vscode.WebviewView;
 
-  public static register(context: vscode.ExtensionContext): vscode.Disposable {
-    const provider = new ColorsViewProvider(context.extensionUri);
+  public static register(context: vscode.ExtensionContext, blackboard: Blackboard): vscode.Disposable {
+    const provider = new ColorsViewProvider(context.extensionUri, blackboard);
     const providerRegistration = vscode.window.registerWebviewViewProvider(ColorsViewProvider.viewType, provider);
     return providerRegistration;
   }
 
-  constructor(private readonly _extensionUri: vscode.Uri) {}
+  constructor(
+    private readonly _extensionUri: vscode.Uri,
+    private readonly blackboard: Blackboard
+  ) {}
 
-  public resolveWebviewView(
+  public async resolveWebviewView(
     webviewView: vscode.WebviewView,
     _context: vscode.WebviewViewResolveContext,
     _token: vscode.CancellationToken
@@ -28,7 +32,11 @@ export class ColorsViewProvider implements vscode.WebviewViewProvider {
       localResourceRoots: [this._extensionUri]
     };
 
-    webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
+    const refresh = async () => {
+      webviewView.webview.html = await this.buildHtmlForWebview(webviewView.webview);
+    };
+    await refresh();
+    this.blackboard.on('activeMapNameChange', refresh);
 
     webviewView.webview.onDidReceiveMessage((data) => {
       switch (data.type) {
@@ -38,61 +46,71 @@ export class ColorsViewProvider implements vscode.WebviewViewProvider {
         }
       }
     });
+
+    // Make sure we get rid of the listener when our editor is closed.
+    webviewView.onDidDispose(() => {
+      this.blackboard.removeListener('activeMapNameChange', refresh);
+    });
   }
 
-  public addColor() {
-    if (this._view) {
-      this._view.show?.(true); // `show` is not implemented in 1.49 but is for 1.50 insiders
-      this._view.webview.postMessage({ type: 'addColor' });
+  /**
+   * Get the static html used for the editor webviews.
+   */
+  private async buildHtmlForWebview(webview: vscode.Webview): Promise<string> {
+    const webviewUri = vscode.Uri.joinPath(this._extensionUri, 'map-tile', 'dist');
+
+    if (!vscode.workspace.workspaceFolders || !this.blackboard.activeMapName) {
+      return '';
     }
-  }
+    const textDecoder = new TextDecoder();
 
-  public clearColors() {
-    if (this._view) {
-      this._view.webview.postMessage({ type: 'clearColors' });
-    }
-  }
+    const dataFolderUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, 'data');
+    const imgFolderUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, 'img', 'tilesets');
 
-  private _getHtmlForWebview(webview: vscode.Webview) {
-    // Get the local path to main script run in the webview, then convert it to a uri we can use in the webview.
-    const scriptUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'main.js'));
+    const tilesetsJson = JSON.parse(
+      textDecoder.decode(await vscode.workspace.fs.readFile(vscode.Uri.joinPath(dataFolderUri, 'Tilesets.json')))
+    );
+    const mapJson = JSON.parse(
+      textDecoder.decode(
+        await vscode.workspace.fs.readFile(vscode.Uri.joinPath(dataFolderUri, this.blackboard.activeMapName))
+      )
+    );
+    const tileset = tilesetsJson[mapJson.tilesetId];
+    const tilesetUris = tileset.tilesetNames.map((value: string) =>
+      value ? `${webview.asWebviewUri(vscode.Uri.joinPath(imgFolderUri, `${value}.png`))}` : ''
+    );
 
-    // Do the same for the stylesheet.
-    const styleResetUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'reset.css'));
-    const styleVSCodeUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'vscode.css'));
-    const styleMainUri = webview.asWebviewUri(vscode.Uri.joinPath(this._extensionUri, 'media', 'main.css'));
+    const tilesetsUri = webview.asWebviewUri(vscode.Uri.joinPath(dataFolderUri, 'Tilesets.json'));
+    const mapUri = webview.asWebviewUri(vscode.Uri.joinPath(dataFolderUri, this.blackboard.activeMapName));
 
-    // Use a nonce to only allow a specific script to be run.
+    const config = {
+      tilesets: `${tilesetsUri}`,
+      map: `${mapUri}`,
+      tilesetNames: tilesetUris
+    };
+
+    const content = await vscode.workspace.fs.readFile(vscode.Uri.joinPath(webviewUri, 'index.html'));
+    let html = textDecoder.decode(content);
+    html = html.replace('"{{rpgmaker-asset-path}}"', `'${JSON.stringify(config)}'`);
+
+    // Use a nonce to whitelist which scripts can be run
     const nonce = getNonce();
 
-    return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
+    return this.fixLinks(html, webviewUri, webview);
+  }
 
-				<!--
-					Use a content security policy to only allow loading styles from our extension directory,
-					and only allow scripts that have a specific nonce.
-					(See the 'webview-sample' extension sample for img-src content security policy examples)
-				-->
-				<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
-
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-				<link href="${styleResetUri}" rel="stylesheet">
-				<link href="${styleVSCodeUri}" rel="stylesheet">
-				<link href="${styleMainUri}" rel="stylesheet">
-
-				<title>Cat Colors</title>
-			</head>
-			<body>
-				<ul class="color-list">
-				</ul>
-
-				<button class="add-color-button">Add Color</button>
-
-				<script nonce="${nonce}" src="${scriptUri}"></script>
-			</body>
-			</html>`;
+  private fixLinks(document: string, documentUri: vscode.Uri, webview: vscode.Webview): string {
+    return document.replace(
+      new RegExp('((?:src|href)=[\'"])(.*?)([\'"])', 'gmi'),
+      (subString: string, p1: string, p2: string, p3: string): string => {
+        const lower = p2.toLowerCase();
+        if (p2.startsWith('#') || lower.startsWith('http://') || lower.startsWith('https://')) {
+          return subString;
+        }
+        const newUri = vscode.Uri.joinPath(documentUri, p2);
+        const newUrl = [p1, webview.asWebviewUri(newUri), p3].join('');
+        return newUrl;
+      }
+    );
   }
 }
